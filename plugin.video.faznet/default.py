@@ -7,28 +7,46 @@ Created on Oct 12, 2013
 '''
 
 import json
+import socket
 import re
+import sys
 import urllib2
-import util
 import xbmc
 import xml.etree.ElementTree as ET
+import os 
+
+
+#addon id - name of addon directory
+_id = 'plugin.video.faznet'
+
+#add our library to python search path
+sys.path.append (xbmc.translatePath( "special://home/addons/" + _id + "/resources/lib"))
+
+# import utitily module
+import util
 
 WEB_PAGE_BASE = "http://www.faz.net"
-ADDON_ID = "plugin.video.faznet"
 
 def playVideo(params):
     util.playMedia(params['title'], params['image'], params['video'], 'Video')
    
-
+def fetchFromUrl(url):
+    try:
+        response = urllib2.urlopen(url, timeout = 30)
+        if response and response.getcode() == 200:
+            return response.read() 
+        else:
+            util.showError(_id, 'Could not open URL %s to create menu' % (url))
+    except socket.timeout, e:
+        log("got timeout error: %r" % e)
+        util.showError(_id, 'Could not open URL %s to create menu' % (url))
+        
 def buildMenu():
     url = WEB_PAGE_BASE + "/multimedia/videos/"
-    response = urllib2.urlopen(url)
-    if response and response.getcode() == 200:
-        content = response.read()       
+    content = fetchFromUrl(url)
+    if content is not None:             
         parseRessorts(content)
-        
-    else:
-        util.showError(ADDON_ID, 'Could not open URL %s to create menu' % (url))
+   
 
 def buildSubMenu(inputParams):    
     ressort = inputParams['ressort'].replace(".", "-")
@@ -40,14 +58,11 @@ def buildSubMenu(inputParams):
     for x in range(0, fetchsize):
         url = "{0}/multimedia/videos/ressort-{1}/?ot=de.faz.ot.www.teaser.more.mmo&type=VIDEO&offset={2}".format(WEB_PAGE_BASE, ressort, str(offset + x)) 
         log("fetch ressorts: {0}".format(url))
-        response = urllib2.urlopen(url)
+        content = fetchFromUrl(url)
         
-        if response and response.getcode() == 200:
-            content = response.read()       
+        if content is not None:
             videoCount = videoCount + parseVideos(content)
-        else:
-            util.showError(ADDON_ID, 'Could not open URL %s to create menu' % (url))
-    
+       
     # add 'next' menu item if more videos available
     if videoCount > 0:
         params = {'title':'Next Page', 'ressort':inputParams['ressort'], 'fetchsize':inputParams['fetchsize']}
@@ -93,7 +108,7 @@ def parseVideos(content):
             link = util.makeLink(params)
             util.addVideoMenuItem(params['title'], params['duration'], link, 'DefaultVideo.png', params['image'], False)
         else:
-            util.showError(ADDON_ID, 'Could not open URL %s to create menu' % (url))
+            util.showError(_id, 'Could not open URL %s to create menu' % (url))
         
     return videoCount
     
@@ -132,7 +147,7 @@ def parseMediaXML(content):
     return params   
 
 def log(msg):
-    xbmc.log(ADDON_ID + ': ' + msg, level=xbmc.LOGDEBUG)    
+    xbmc.log(_id + ': ' + msg, level=xbmc.LOGDEBUG)    
 
 if __name__ == '__main__':
     parameters = util.parseParameters()
