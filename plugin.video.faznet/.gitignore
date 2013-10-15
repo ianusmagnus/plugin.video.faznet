@@ -1,1 +1,2 @@
-/util.pyc
+*.pyc
+*.pyo
