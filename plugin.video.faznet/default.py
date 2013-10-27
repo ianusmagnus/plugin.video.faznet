@@ -83,7 +83,7 @@ def buildSubMenu(inputParams):
    
     
 def parseRessorts(content):
-    """ Parses a site for categories """
+    """ Parses the html content for categories """
     for x in re.findall(r"<a.*fazAjaxContentChanger.*ressort=(\d\.\d*).*>(.*)</a>", content):
         params = {}
         params['title'] = x[1]
@@ -96,7 +96,7 @@ def parseRessorts(content):
     util.endListing()
      
 def parseVideos(content):
-    """ Parses a site for video content """
+    """ Parses the html content for video links """
     matchList = re.findall(r"-(\d{8}).html", content)
     videoCount = 0
     
@@ -141,11 +141,13 @@ def parseMediaXML(content):
     if image is not None:
         params['image'] = image.text
         
-    #parse title
+    #parse title from json string
     title =  root.find('./VIDEO_COUNT_URL')
     if title is not None:
         try:
-            info = json.loads(title.text)
+            # replace wrong quotes in json string
+            jsonText = re.sub(r"([^,{:])(\")([^:,}])", r"\g<1>'\g<3>", title.text)
+            info = json.loads(jsonText)
             params['title'] = info['cn']
         except (ValueError, TypeError):
             # raise if json string is invalid
