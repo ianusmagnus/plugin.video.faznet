@@ -28,9 +28,11 @@ import util
 WEB_PAGE_BASE = "http://www.faz.net"
 
 def playVideo(params):
+    """ Plays a video in xbmc """
     util.playMedia(params['title'], params['image'], params['video'], 'Video')
    
 def fetchFromUrl(url):
+    """ Gets html content from the given url """
     try:
         response = urllib2.urlopen(url, timeout = 30)
         if response and response.getcode() == 200:
@@ -42,6 +44,7 @@ def fetchFromUrl(url):
         util.showError(_id, 'Could not open URL %s to create menu' % (url))
         
 def buildMenu():
+    """ Creates the main menu with all categories """
     url = WEB_PAGE_BASE + "/multimedia/videos/"
     content = fetchFromUrl(url)
     if content is not None:             
@@ -49,6 +52,7 @@ def buildMenu():
    
 
 def buildSubMenu(inputParams):    
+    """ Creates the submenu for a category """
     ressort = inputParams['ressort'].replace(".", "-")
     offset = int(inputParams['offset'])
     fetchsize = int(inputParams['fetchsize'])
@@ -79,6 +83,7 @@ def buildSubMenu(inputParams):
    
     
 def parseRessorts(content):
+    """ Parses a site for categories """
     for x in re.findall(r"<a.*fazAjaxContentChanger.*ressort=(\d\.\d*).*>(.*)</a>", content):
         params = {}
         params['title'] = x[1]
@@ -91,6 +96,7 @@ def parseRessorts(content):
     util.endListing()
      
 def parseVideos(content):
+    """ Parses a site for video content """
     matchList = re.findall(r"-(\d{8}).html", content)
     videoCount = 0
     
@@ -113,6 +119,7 @@ def parseVideos(content):
     return videoCount
     
 def parseMediaXML(content):
+    """ Parses a XML media file to get meta data """
     params = {}
     root = ET.fromstring(content)
     

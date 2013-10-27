@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.faznet" name="FAZ.NET Videos" version="1.0.0"
+<addon id="plugin.video.faznet" name="FAZ.NET Videos" version="0.1.1"
 	provider-name="ianusmagnus">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0" />
@@ -15,6 +15,6 @@
 		<platform>all</platform>
 		<language>de</language>
 		<disclaimer lang="en">Some parts of this addon may not be legal in your country of residence - please check with your local laws before installing.</disclaimer>
-        <website>http://www.arte.tv</website>
+        <website>http://www.faz.net</website>
 	</extension>
 </addon>
